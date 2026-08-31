@@ -1,3 +1,4 @@
+```toml
 [build-system]
 requires = ["setuptools>=68", "wheel", "build"]
 build-backend = "setuptools.build_meta"
@@ -9,9 +10,11 @@ description = "Open Local Capability & Automation Platform — a local MCP capab
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "Apache-2.0"}
+
 authors = [
     {name = "SAMRADDHASHRIVASTAVATECH"}
 ]
+
 keywords = [
     "ai",
     "agents",
@@ -22,6 +25,7 @@ keywords = [
     "rag",
     "local-ai"
 ]
+
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -47,3 +51,4 @@ olcap = "olcap.__main__:main"
 
 [tool.setuptools.packages.find]
 include = ["olcap*"]
+```
