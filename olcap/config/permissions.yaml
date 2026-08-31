@@ -1,0 +1,56 @@
+# OLCAP permission policy.
+#
+# Categories: read | write | execute | network | credentials |
+#             external_communication | destructive
+# Decisions : allow | deny | require_approval
+#
+# Safety overrides execution: a denied or unapproved sensitive action never
+# runs, regardless of what the router, the graph or an agent asks for.
+#
+# Edit this file to tighten or loosen the policy. Unknown keys are ignored and
+# the built-in defaults below are used for anything not specified.
+
+defaults:
+  read: allow                    # reading the user's own machine is normal
+  write: allow                   # writing is what most objectives need
+  network: allow                 # search/fetch are core capabilities
+  execute: require_approval      # running programs is gated
+  external_communication: require_approval
+  destructive: require_approval  # delete/move/overwrite
+  credentials: deny              # never read secrets from disk
+
+# Paths that are never touched, even with approval. Anything under these wins
+# over every other rule. ${HOME} is expanded.
+deny_paths:
+  - "/etc"
+  - "/boot"
+  - "/proc"
+  - "/sys"
+  - "/root"
+  - "/usr/bin"
+  - "/bin"
+  - "/sbin"
+  - "C:\\Windows"
+  - "C:\\Program Files"
+  - "C:\\Program Files (x86)"
+  - "${HOME}/AppData/Roaming/Microsoft/Credentials"
+  - "${HOME}/.ssh"
+  - "${HOME}/.aws"
+  - "${HOME}/.gnupg"
+
+# Work inside these paths is auto-approved (they are OLCAP's own space).
+allow_paths:
+  - "${HOME}/.olcap"
+
+# Patterns auto-approved without prompting, as "<category>:<action>".
+# `*` is supported as a wildcard for category or action.
+auto_approve:
+  - "read:*"
+  - "network:*"
+  - "write:olcap"
+
+# These categories always require explicit approval, even if a default or an
+# auto-approve pattern would otherwise allow them.
+always_require:
+  - "destructive"
+  - "credentials"

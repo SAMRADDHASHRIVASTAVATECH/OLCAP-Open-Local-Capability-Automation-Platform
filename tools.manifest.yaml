@@ -1,0 +1,629 @@
+# tools.manifest.yaml - generated from the live capability registry.
+# generated_at: 2026-08-30T21:46:25+00:00
+# Regenerate rather than edit by hand: python /tmp/val/gen_docs.py
+version: 1
+controller: olcap.core.orchestrator.UnifiedCore
+transport: mcp/stdio
+servers:
+  - id: web_browser
+    title: "Web + Browser"
+    module: olcap.servers.web_browser
+    tool_count: 7
+    tools:
+      - name: web_browse
+        capability: WEB_BROWSE
+        description: "Fetch a URL, follow redirects, return rendered-ish HTML plus metadata."
+        inputs:
+          url: {type: string, required: true}
+          render: {type: boolean, required: false}
+          max_bytes: {type: integer, required: false}
+        permissions: [network]
+        platforms: [windows, linux]
+        jit: false
+        verification_required: false
+        backends:
+          - id: olcap-fetch
+            state: in-repo
+          - id: playwright
+            state: jit-worker
+          - id: olcap-fetch
+            state: in-repo
+        optional_backends:   # known, not integrated
+          - jina-reader
+      - name: web_compare_sources
+        capability: SOURCE_COMPARISON
+        description: "Compare claims across sources and surface agreement/disagreement."
+        inputs:
+          claim: {type: string, required: true}
+          sources: {type: array, required: false}
+          max_sources: {type: integer, required: false}
+        permissions: [network]
+        platforms: [windows, linux]
+        jit: false
+        verification_required: false
+        backends:
+          - id: olcap-search-core
+            state: in-repo
+          - id: olcap-search-core
+            state: in-repo
+        optional_backends:   # known, not integrated
+          - olcap-research-engine
+      - name: web_crawl
+        capability: WEB_CRAWL
+        description: "Breadth-first crawl within a domain, respecting robots.txt and limits."
+        inputs:
+          url: {type: string, required: true}
+          max_pages: {type: integer, required: false}
+          max_depth: {type: integer, required: false}
+          same_domain: {type: boolean, required: false}
+          extract: {type: boolean, required: false}
+          destination: {type: string, required: false}
+        permissions: [network]
+        platforms: [windows, linux]
+        jit: true
+        verification_required: false
+        backends:
+          - id: olcap-crawler
+            state: in-repo
+          - id: crawl4ai
+            state: jit-worker
+          - id: olcap-crawler
+            state: in-repo
+        optional_backends:   # known, not integrated
+          - firecrawl
+      - name: web_discover_sources
+        capability: SOURCE_DISCOVERY
+        description: "Find candidate sources for a topic and score them by diversity."
+        inputs:
+          topic: {type: string, required: true}
+          max_sources: {type: integer, required: false}
+        permissions: [network]
+        platforms: [windows, linux]
+        jit: false
+        verification_required: false
+        backends:
+          - id: olcap-search-core
+            state: in-repo
+          - id: searxng
+            state: in-repo
+          - id: olcap-search-core
+            state: in-repo
+      - name: web_extract
+        capability: WEB_EXTRACT
+        description: "Extract main content, metadata and structured fields from a page."
+        inputs:
+          url: {type: string, required: true}
+          mode: {type: string, required: false}
+          schema: {type: object, required: false}
+        permissions: [network]
+        platforms: [windows, linux]
+        jit: false
+        verification_required: false
+        backends:
+          - id: trafilatura
+            state: jit-worker
+          - id: crawl4ai
+            state: jit-worker
+          - id: trafilatura
+            state: jit-worker
+        optional_backends:   # known, not integrated
+          - jina-reader
+      - name: web_interact
+        capability: WEB_INTERACT
+        description: "Drive a real browser: navigate, click, type, select, wait, screenshot."
+        inputs:
+          action: {type: string, required: true}
+          url: {type: string, required: false}
+          selector: {type: string, required: false}
+          text: {type: string, required: false}
+          timeout_ms: {type: integer, required: false}
+        permissions: [network, execute]
+        platforms: [windows, linux]
+        jit: true
+        verification_required: false
+        backends:
+          - id: playwright
+            state: jit-worker
+          - id: playwright
+            state: jit-worker
+        optional_backends:   # known, not integrated
+          - browser-use
+          - stagehand
+      - name: web_search
+        capability: WEB_SEARCH
+        description: "Multi-source internet search with deduplication, ranking and provenance."
+        inputs:
+          query: {type: string, required: true}
+          engines: {type: array, required: false}
+          max_results: {type: integer, required: false}
+          recency_days: {type: integer, required: false}
+        permissions: [network]
+        platforms: [windows, linux]
+        jit: false
+        verification_required: false
+        backends:
+          - id: olcap-search-core
+            state: in-repo
+          - id: searxng
+            state: in-repo
+          - id: olcap-search-core
+            state: in-repo
+  - id: research_knowledge
+    title: "Research + Knowledge"
+    module: olcap.servers.research_knowledge
+    tool_count: 6
+    tools:
+      - name: document_process
+        capability: DOCUMENT_INTELLIGENCE
+        description: "Parse PDF/DOCX/HTML/TXT/MD into text, sections and tables."
+        inputs:
+          action: {type: string, required: true}
+          path: {type: string, required: false}
+          url: {type: string, required: false}
+          engine: {type: string, required: false}
+        permissions: [read]
+        platforms: [windows, linux]
+        jit: true
+        verification_required: false
+        backends:
+          - id: pypdf
+            state: jit-worker
+          - id: python-docx
+            state: jit-worker
+          - id: olcap-text-extract
+            state: in-repo
+          - id: trafilatura
+            state: jit-worker
+          - id: docling
+            state: jit-worker
+          - id: unstructured
+            state: jit-worker
+          - id: marker
+            state: jit-worker
+          - id: olcap-text-extract
+            state: in-repo
+          - id: pypdf
+            state: jit-worker
+          - id: trafilatura
+            state: jit-worker
+      - name: knowledge_search
+        capability: KNOWLEDGE_SEARCH
+        description: "Semantic + lexical search across ingested knowledge bases."
+        inputs:
+          query: {type: string, required: true}
+          collection: {type: string, required: false}
+          top_k: {type: integer, required: false}
+          mode: {type: string, required: false}
+        permissions: [read]
+        platforms: [windows, linux]
+        jit: false
+        verification_required: false
+        backends:
+          - id: olcap-rag
+            state: in-repo
+          - id: olcap-rag
+            state: in-repo
+        optional_backends:   # known, not integrated
+          - llamaindex
+          - haystack
+          - anythingllm
+      - name: memory_op
+        capability: MEMORY
+        description: "Episodic, semantic and procedural memory with salience, decay and provenance. Shared by every agent, server and workflow."
+        inputs:
+          action: {type: string, required: true}
+          kind: {type: string, required: false}
+          text: {type: string, required: false}
+          query: {type: string, required: false}
+          limit: {type: integer, required: false}
+          id: {type: string, required: false}
+          salience: {type: number, required: false}
+          meta: {type: object, required: false}
+          source: {type: string, required: false}
+          title: {type: string, required: false}
+        permissions: [read, write]
+        platforms: [windows, linux]
+        jit: false
+        verification_required: false
+        backends:
+          - id: olcap-memory
+            state: in-repo
+          - id: mem0
+            state: jit-worker
+          - id: cognee
+            state: jit-worker
+          - id: graphiti
+            state: jit-worker
+          - id: olcap-memory
+            state: in-repo
+        optional_backends:   # known, not integrated
+          - letta
+      - name: rag_query
+        capability: RAG
+        description: "Ingest documents into a collection, then answer with citations."
+        inputs:
+          action: {type: string, required: true}
+          collection: {type: string, required: false}
+          query: {type: string, required: false}
+          paths: {type: array, required: false}
+          urls: {type: array, required: false}
+          text: {type: string, required: false}
+          top_k: {type: integer, required: false}
+          source: {type: string, required: false}
+          title: {type: string, required: false}
+          mode: {type: string, required: false}
+        permissions: [read, write]
+        platforms: [windows, linux]
+        jit: true
+        verification_required: true
+        backends:
+          - id: olcap-rag
+            state: in-repo
+          - id: llamaindex
+            state: jit-worker
+          - id: haystack
+            state: jit-worker
+          - id: olcap-rag
+            state: in-repo
+        optional_backends:   # known, not integrated
+          - ragflow
+          - anythingllm
+      - name: research_run
+        capability: RESEARCH
+        description: "Plan sub-questions, gather evidence from the web, verify sources, and produce a cited report with a confidence score."
+        inputs:
+          question: {type: string, required: true}
+          depth: {type: integer, required: false}
+          max_sources: {type: integer, required: false}
+          verify: {type: boolean, required: false}
+        permissions: [network, read, write]
+        platforms: [windows, linux]
+        jit: true
+        verification_required: true
+        backends:
+          - id: olcap-research-engine
+            state: in-repo
+          - id: olcap-research-engine
+            state: in-repo
+        optional_backends:   # known, not integrated
+          - gpt-researcher
+          - open-deep-search
+          - mindsearch
+          - perplexica
+      - name: source_verify
+        capability: SOURCE_VERIFICATION
+        description: "Check claims/sources: cross-source agreement, domain reputation, recency, citation presence, contradiction detection."
+        inputs:
+          claim: {type: string, required: true}
+          sources: {type: array, required: false}
+          min_sources: {type: integer, required: false}
+          evidence: {type: array, required: false}
+        permissions: [network]
+        platforms: [windows, linux]
+        jit: false
+        verification_required: true
+        backends:
+          - id: olcap-research-engine
+            state: in-repo
+          - id: olcap-research-engine
+            state: in-repo
+        optional_backends:   # known, not integrated
+          - ragas
+  - id: data_automation_os
+    title: "Data + Automation + Computer/OS"
+    module: olcap.servers.data_automation_os
+    tool_count: 16
+    tools:
+      - name: computer_use
+        capability: COMPUTER_USE
+        description: "Composite screen+input control: observe the desktop and act on it."
+        inputs:
+          action: {type: string, required: true}
+          params: {type: object, required: false}
+        permissions: [execute, read]
+        platforms: [windows, linux]
+        jit: true
+        verification_required: false
+        backends:
+          - id: olcap-os-adapter
+            state: in-repo
+          - id: olcap-os-adapter
+            state: in-repo
+        optional_backends:   # known, not integrated
+          - pyautogui
+          - openhands
+      - name: data_analyze
+        capability: DATA_ANALYSIS
+        description: "Profile, clean, aggregate and summarise CSV/Parquet/JSON/SQLite data."
+        inputs:
+          action: {type: string, required: true}
+          path: {type: string, required: false}
+          destination: {type: string, required: false}
+          expr: {type: string, required: false}
+          query: {type: string, required: false}
+          limit: {type: integer, required: false}
+        permissions: [read, write]
+        platforms: [windows, linux]
+        jit: false
+        verification_required: false
+        backends:
+          - id: duckdb
+            state: in-repo
+          - id: duckdb
+            state: in-repo
+      - name: database_query
+        capability: DATABASE_QUERY
+        description: "SQL over DuckDB/SQLite/Parquet with guardrails and result limits."
+        inputs:
+          sql: {type: string, required: true}
+          source: {type: string, required: false}
+          limit: {type: integer, required: false}
+        permissions: [read, write]
+        platforms: [windows, linux]
+        jit: false
+        verification_required: false
+        backends:
+          - id: duckdb
+            state: in-repo
+          - id: duckdb
+            state: in-repo
+        optional_backends:   # known, not integrated
+          - pgvector
+      - name: filesystem_op
+        capability: FILESYSTEM
+        description: "Read/write/list/stat/move/copy/delete through the permission policy."
+        inputs:
+          action: {type: string, required: true}
+          path: {type: string, required: false}
+          destination: {type: string, required: false}
+          content: {type: string, required: false}
+          pattern: {type: string, required: false}
+          recursive: {type: boolean, required: false}
+          limit: {type: integer, required: false}
+          append: {type: boolean, required: false}
+        permissions: [read, write, destructive]
+        platforms: [windows, linux]
+        jit: false
+        verification_required: false
+        backends:
+          - id: olcap-os-adapter
+            state: in-repo
+          - id: olcap-os-adapter
+            state: in-repo
+      - name: gui_action
+        capability: GUI
+        description: "Keyboard/mouse automation and element interaction."
+        inputs:
+          action: {type: string, required: true}
+          params: {type: object, required: false}
+        permissions: [execute]
+        platforms: [windows, linux]
+        jit: true
+        verification_required: false
+        backends:
+          - id: olcap-os-adapter
+            state: in-repo
+          - id: playwright
+            state: jit-worker
+          - id: olcap-os-adapter
+            state: in-repo
+        optional_backends:   # known, not integrated
+          - pyautogui
+      - name: observability_report
+        capability: OBSERVABILITY
+        description: "Spans, counters, traces and health of the whole system."
+        inputs:
+          scope: {type: string, required: false}
+        permissions: [read]
+        platforms: [windows, linux]
+        jit: false
+        verification_required: false
+        backends:
+          - id: olcap-observability
+            state: in-repo
+          - id: olcap-observability
+            state: in-repo
+        optional_backends:   # known, not integrated
+          - opentelemetry
+          - phoenix
+          - langfuse
+      - name: process_control
+        capability: PROCESS_CONTROL
+        description: "List, inspect, start and stop processes."
+        inputs:
+          action: {type: string, required: true}
+          pid: {type: integer, required: false}
+          name: {type: string, required: false}
+          argv: {type: array, required: false}
+          cwd: {type: string, required: false}
+          env: {type: object, required: false}
+          force: {type: boolean, required: false}
+        permissions: [execute, destructive]
+        platforms: [windows, linux]
+        jit: false
+        verification_required: false
+        backends:
+          - id: olcap-os-adapter
+            state: in-repo
+          - id: olcap-os-adapter
+            state: in-repo
+        optional_backends:   # known, not integrated
+          - pywin32
+      - name: routing_model_op
+        capability: ROUTING
+        description: "Random Forest routing: train, validate, compare, enable/disable."
+        inputs:
+          action: {type: string, required: true}
+          capability: {type: string, required: false}
+        permissions: [read, write]
+        platforms: [windows, linux]
+        jit: false
+        verification_required: false
+        backends:
+          - id: olcap-deterministic-router
+            state: in-repo
+          - id: olcap-deterministic-router
+            state: in-repo
+        optional_backends:   # known, not integrated
+          - scikit-learn
+      - name: screenshot_capture
+        capability: SCREENSHOT
+        description: "Capture the screen, a window or a region to a file."
+        inputs:
+          target: {type: string, required: false}
+          region: {type: array, required: false}
+          path: {type: string, required: false}
+        permissions: [read, write]
+        platforms: [windows, linux]
+        jit: false
+        verification_required: false
+        backends:
+          - id: pillow
+            state: in-repo
+          - id: olcap-os-adapter
+            state: in-repo
+          - id: playwright
+            state: jit-worker
+          - id: olcap-os-adapter
+            state: in-repo
+        optional_backends:   # known, not integrated
+          - pyautogui
+      - name: task_schedule
+        capability: DURABLE_TASKS
+        description: "Crash-safe queued tasks with retries, backoff, checkpoints and resume."
+        inputs:
+          action: {type: string, required: true}
+          task: {type: object, required: false}
+          task_id: {type: string, required: false}
+          max_retries: {type: integer, required: false}
+        permissions: [read, write, execute]
+        platforms: [windows, linux]
+        jit: false
+        verification_required: false
+        backends:
+          - id: olcap-workflows
+            state: in-repo
+          - id: olcap-workflows
+            state: in-repo
+        optional_backends:   # known, not integrated
+          - prefect
+          - temporal
+      - name: terminal_run
+        capability: TERMINAL
+        description: "Run a shell command with timeout, cwd, env filtering and audit."
+        inputs:
+          command: {type: string, required: true}
+          cwd: {type: string, required: false}
+          timeout_s: {type: integer, required: false}
+          shell: {type: string, required: false}
+        permissions: [execute]
+        platforms: [windows, linux]
+        jit: false
+        verification_required: false
+        backends:
+          - id: olcap-os-adapter
+            state: in-repo
+          - id: olcap-os-adapter
+            state: in-repo
+      - name: vector_store_op
+        capability: VECTOR_STORAGE
+        description: "Create/upsert/search vector collections (embedded, no server needed)."
+        inputs:
+          action: {type: string, required: true}
+          collection: {type: string, required: false}
+          vectors: {type: array, required: false}
+          query: {type: string, required: false}
+          top_k: {type: integer, required: false}
+          dim: {type: integer, required: false}
+          vector: {type: array, required: false}
+        permissions: [read, write]
+        platforms: [windows, linux]
+        jit: true
+        verification_required: false
+        backends:
+          - id: sqlite-vec
+            state: in-repo
+          - id: qdrant
+            state: in-repo
+          - id: chroma
+            state: jit-worker
+          - id: sqlite-vec
+            state: in-repo
+        optional_backends:   # known, not integrated
+          - pgvector
+      - name: verify_result
+        capability: VERIFICATION
+        description: "Check that a produced artifact satisfies its success criteria."
+        inputs:
+          artifact_id: {type: string, required: false}
+          criteria: {type: array, required: false}
+          result: {type: object, required: false}
+        permissions: [read]
+        platforms: [windows, linux]
+        jit: false
+        verification_required: true
+        backends:
+          - id: olcap-verification
+            state: in-repo
+          - id: ragas
+            state: jit-worker
+          - id: olcap-verification
+            state: in-repo
+        optional_backends:   # known, not integrated
+          - promptfoo
+      - name: window_manage
+        capability: WINDOW_MANAGEMENT
+        description: "List, focus, move, resize, minimise and close windows."
+        inputs:
+          action: {type: string, required: true}
+          title: {type: string, required: false}
+          params: {type: object, required: false}
+        permissions: [execute]
+        platforms: [windows, linux]
+        jit: false
+        verification_required: false
+        backends:
+          - id: olcap-os-adapter
+            state: in-repo
+          - id: olcap-os-adapter
+            state: in-repo
+        optional_backends:   # known, not integrated
+          - pywin32
+      - name: windows_control
+        capability: WINDOWS_CONTROL
+        description: "Windows-native control: services, registry read, environment, apps, clipboard, notifications. Linux equivalent provided by the OS adapter."
+        inputs:
+          action: {type: string, required: true}
+          params: {type: object, required: false}
+        permissions: [read, write, execute, destructive]
+        platforms: [windows, linux]
+        jit: false
+        verification_required: false
+        backends:
+          - id: olcap-os-adapter
+            state: in-repo
+          - id: olcap-os-adapter
+            state: in-repo
+        optional_backends:   # known, not integrated
+          - pywin32
+      - name: workflow_run
+        capability: WORKFLOW_EXECUTION
+        description: "Define, execute, pause, resume and inspect multi-step workflows."
+        inputs:
+          action: {type: string, required: true}
+          workflow: {type: object, required: false}
+          run_id: {type: string, required: false}
+        permissions: [read, write, execute]
+        platforms: [windows, linux]
+        jit: false
+        verification_required: false
+        backends:
+          - id: olcap-workflows
+            state: in-repo
+          - id: olcap-workflows
+            state: in-repo
+        optional_backends:   # known, not integrated
+          - prefect
+          - temporal
+          - langgraph
+          - crewai

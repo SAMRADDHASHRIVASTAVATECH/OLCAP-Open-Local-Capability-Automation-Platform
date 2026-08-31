@@ -1,0 +1,648 @@
+{
+  "steps": {
+    "01": {
+      "name": "detect environment",
+      "ok": true,
+      "result": {
+        "platform": "linux",
+        "release": "6.1.158+",
+        "version": "#1 SMP PREEMPT_DYNAMIC Fri Jul 17 14:31:34 UTC 2026",
+        "machine": "x86_64",
+        "python": "3.13.14",
+        "executable": "/usr/local/bin/python3",
+        "cwd": "/home/user"
+      }
+    },
+    "02": {
+      "name": "inspect hardware",
+      "ok": true,
+      "result": {
+        "platform": "linux",
+        "platform_release": "6.1.158+",
+        "cpu_count": 2,
+        "ram_total_gb": 1.94,
+        "vram_total_gb": null,
+        "gpu": null
+      }
+    },
+    "03": {
+      "name": "inspect OpenLive/OpenCode",
+      "ok": false,
+      "error": "AttributeError: 'Config' object has no attribute 'platform_release'"
+    },
+    "04": {
+      "name": "verify foundation",
+      "ok": false,
+      "error": "AttributeError: 'Config' object has no attribute 'platform_release'"
+    },
+    "05": {
+      "name": "inspect prerequisites",
+      "ok": true,
+      "result": {
+        "executables": {
+          "python": "/usr/local/bin/python",
+          "python3": "/usr/local/bin/python3",
+          "py": null,
+          "node": "/usr/bin/node",
+          "npm": "/usr/bin/npm",
+          "git": "/usr/bin/git",
+          "docker": null,
+          "winget": null
+        },
+        "python_modules": {
+          "mcp": true,
+          "duckdb": true,
+          "trafilatura": true,
+          "pypdf": true,
+          "docx": true,
+          "qdrant_client": true,
+          "sqlite_vec": true,
+          "sklearn": true,
+          "psutil": true,
+          "playwright": true,
+          "PIL": true,
+          "pyautogui": false,
+          "win32gui": false
+        },
+        "missing_core_modules": []
+      }
+    },
+    "09": {
+      "name": "configure components",
+      "ok": true,
+      "result": {
+        "env_file": "/home/user/.olcap/olcap.env",
+        "created": false,
+        "exists": false
+      }
+    },
+    "10": {
+      "name": "configure registries",
+      "ok": true,
+      "result": {
+        "capabilities": 29,
+        "components": 62,
+        "servers": [
+          "web_browser",
+          "research_knowledge",
+          "data_automation_os"
+        ]
+      }
+    },
+    "11": {
+      "name": "configure JIT",
+      "ok": true,
+      "result": {
+        "inproc_pools": [
+          "duckdb"
+        ],
+        "max_concurrency": "2",
+        "idle_ttl_default_s": 300
+      }
+    },
+    "12": {
+      "name": "configure permissions",
+      "ok": true,
+      "result": {
+        "defaults": {
+          "read": "allow",
+          "write": "allow",
+          "execute": "require_approval",
+          "network": "allow",
+          "credentials": "deny",
+          "external_communication": "require_approval",
+          "destructive": "require_approval"
+        },
+        "always_require": [
+          "destructive",
+          "credentials"
+        ],
+        "allow_paths": [
+          "/home/user/.olcap",
+          "/home/user/olcap"
+        ],
+        "deny_paths": [
+          "/etc",
+          "/boot",
+          "/proc",
+          "/sys",
+          "/root",
+          "/usr/bin",
+          "/bin",
+          "/sbin"
+        ]
+      }
+    },
+    "13": {
+      "name": "configure storage",
+      "ok": true,
+      "result": {
+        "directories": {
+          "data": "/home/user/.olcap/data",
+          "logs": "/home/user/.olcap/logs",
+          "artifacts": "/home/user/.olcap/artifacts",
+          "indexes": "/home/user/.olcap/indexes",
+          "traces": "/home/user/.olcap/traces",
+          "reports": "/home/user/.olcap/reports"
+        },
+        "state_db": "/home/user/.olcap/data/state.db",
+        "writable": true
+      }
+    },
+    "14": {
+      "name": "configure platform adapters",
+      "ok": true,
+      "result": {
+        "platform": "linux",
+        "capabilities": {
+          "filesystem": true,
+          "terminal": true,
+          "processes": true,
+          "os_control": true,
+          "gui": false,
+          "screenshot": false,
+          "window_management": false
+        }
+      }
+    },
+    "15": {
+      "name": "register capabilities",
+      "ok": true,
+      "result": {
+        "bound": {
+          "WEB_SEARCH": [
+            "olcap-search-core",
+            "olcap-search-core"
+          ],
+          "WEB_BROWSE": [
+            "olcap-fetch",
+            "playwright",
+            "olcap-fetch"
+          ],
+          "WEB_CRAWL": [
+            "olcap-crawler",
+            "crawl4ai",
+            "olcap-crawler"
+          ],
+          "WEB_EXTRACT": [
+            "trafilatura",
+            "crawl4ai",
+            "trafilatura"
+          ],
+          "WEB_INTERACT": [
+            "playwright",
+            "playwright"
+          ],
+          "SOURCE_DISCOVERY": [
+            "olcap-search-core",
+            "olcap-search-core"
+          ],
+          "SOURCE_COMPARISON": [
+            "olcap-search-core",
+            "olcap-search-core"
+          ],
+          "RESEARCH": [
+            "olcap-research-engine",
+            "olcap-research-engine"
+          ],
+          "KNOWLEDGE_SEARCH": [
+            "olcap-rag",
+            "llamaindex",
+            "haystack",
+            "olcap-rag"
+          ],
+          "RAG": [
+            "olcap-rag",
+            "llamaindex",
+            "haystack",
+            "olcap-rag"
+          ],
+          "MEMORY": [
+            "olcap-memory",
+            "mem0",
+            "cognee",
+            "graphiti",
+            "olcap-memory"
+          ],
+          "DOCUMENT_INTELLIGENCE": [
+            "pypdf",
+            "python-docx",
+            "olcap-text-extract",
+            "trafilatura",
+            "docling",
+            "unstructured",
+            "marker",
+            "olcap-text-extract",
+            "pypdf",
+            "trafilatura"
+          ],
+          "SOURCE_VERIFICATION": [
+            "olcap-research-engine",
+            "ragas",
+            "olcap-research-engine"
+          ],
+          "DATA_ANALYSIS": [
+            "duckdb",
+            "duckdb"
+          ],
+          "DATABASE_QUERY": [
+            "duckdb",
+            "duckdb"
+          ],
+          "VECTOR_STORAGE": [
+            "sqlite-vec",
+            "qdrant",
+            "chroma",
+            "sqlite-vec"
+          ],
+          "WORKFLOW_EXECUTION": [
+            "olcap-workflows",
+            "olcap-workflows"
+          ],
+          "DURABLE_TASKS": [
+            "olcap-workflows",
+            "olcap-workflows"
+          ],
+          "FILESYSTEM": [
+            "olcap-os-adapter",
+            "olcap-os-adapter"
+          ],
+          "TERMINAL": [
+            "olcap-os-adapter",
+            "olcap-os-adapter"
+          ],
+          "PROCESS_CONTROL": [
+            "olcap-os-adapter",
+            "olcap-os-adapter"
+          ],
+          "COMPUTER_USE": [
+            "olcap-os-adapter",
+            "olcap-os-adapter"
+          ],
+          "WINDOWS_CONTROL": [
+            "olcap-os-adapter",
+            "olcap-os-adapter"
+          ],
+          "GUI": [
+            "olcap-os-adapter",
+            "playwright",
+            "olcap-os-adapter"
+          ],
+          "SCREENSHOT": [
+            "olcap-os-adapter",
+            "playwright",
+            "olcap-os-adapter"
+          ],
+          "WINDOW_MANAGEMENT": [
+            "olcap-os-adapter",
+            "olcap-os-adapter"
+          ],
+          "OBSERVABILITY": [
+            "olcap-observability",
+            "olcap-observability"
+          ],
+          "VERIFICATION": [
+            "olcap-verification",
+            "ragas",
+            "olcap-verification"
+          ],
+          "ROUTING": [
+            "olcap-deterministic-router",
+            "olcap-deterministic-router"
+          ]
+        },
+        "unbound": [],
+        "total": 29
+      }
+    },
+    "16": {
+      "name": "start MCP interfaces",
+      "ok": true,
+      "result": {
+        "transport": "stdio",
+        "daemons": [],
+        "prewarmed": [
+          "olcap-memory"
+        ]
+      }
+    },
+    "17": {
+      "name": "test everything",
+      "ok": true,
+      "result": {
+        "ok": true,
+        "results": {
+          "olcap/tests/test_core.py": {
+            "ok": true,
+            "summary": "18 passed in 1.70s"
+          }
+        }
+      }
+    },
+    "18": {
+      "name": "repair failures",
+      "ok": true,
+      "result": {
+        "repaired": [],
+        "failed": [],
+        "examined": 62
+      }
+    },
+    "19": {
+      "name": "health check everything",
+      "ok": true,
+      "result": {
+        "summary": {
+          "total": 62,
+          "by_state": {
+            "healthy": 24,
+            "unavailable": 38
+          },
+          "healthy": [
+            "duckdb",
+            "olcap-crawler",
+            "olcap-deterministic-router",
+            "olcap-fetch",
+            "olcap-memory",
+            "olcap-observability",
+            "olcap-os-adapter",
+            "olcap-rag",
+            "olcap-research-engine",
+            "olcap-search-core",
+            "olcap-text-extract",
+            "olcap-verification",
+            "olcap-workflows",
+            "opentelemetry",
+            "pillow",
+            "playwright",
+            "promptfoo",
+            "pypdf",
+            "python-docx",
+            "qdrant",
+            "scikit-learn",
+            "sqlite-vec",
+            "stagehand",
+            "trafilatura"
+          ]
+        },
+        "components": {
+          "olcap-search-core": {
+            "state": "healthy",
+            "installed": true
+          },
+          "searxng": {
+            "state": "unavailable",
+            "installed": false
+          },
+          "olcap-fetch": {
+            "state": "healthy",
+            "installed": true
+          },
+          "trafilatura": {
+            "state": "healthy",
+            "installed": true
+          },
+          "olcap-crawler": {
+            "state": "healthy",
+            "installed": true
+          },
+          "crawl4ai": {
+            "state": "unavailable",
+            "installed": false
+          },
+          "firecrawl": {
+            "state": "unavailable",
+            "installed": false
+          },
+          "jina-reader": {
+            "state": "unavailable",
+            "installed": false
+          },
+          "playwright": {
+            "state": "healthy",
+            "installed": true
+          },
+          "browser-use": {
+            "state": "unavailable",
+            "installed": false
+          },
+          "stagehand": {
+            "state": "healthy",
+            "installed": true
+          },
+          "olcap-research-engine": {
+            "state": "healthy",
+            "installed": true
+          },
+          "gpt-researcher": {
+            "state": "unavailable",
+            "installed": false
+          },
+          "open-deep-search": {
+            "state": "unavailable",
+            "installed": false
+          },
+          "mindsearch": {
+            "state": "unavailable",
+            "installed": false
+          },
+          "perplexica": {
+            "state": "unavailable",
+            "installed": false
+          },
+          "olcap-rag": {
+            "state": "healthy",
+            "installed": true
+          },
+          "sqlite-vec": {
+            "state": "healthy",
+            "installed": true
+          },
+          "qdrant": {
+            "state": "healthy",
+            "installed": true
+          },
+          "chroma": {
+            "state": "unavailable",
+            "installed": false
+          },
+          "llamaindex": {
+            "state": "unavailable",
+            "installed": false
+          },
+          "haystack": {
+            "state": "unavailable",
+            "installed": false
+          },
+          "ragflow": {
+            "state": "unavailable",
+            "installed": false
+          },
+          "anythingllm": {
+            "state": "unavailable",
+            "installed": false
+          },
+          "olcap-memory": {
+            "state": "healthy",
+            "installed": true
+          },
+          "mem0": {
+            "state": "unavailable",
+            "installed": false
+          },
+          "cognee": {
+            "state": "unavailable",
+            "installed": false
+          },
+          "graphiti": {
+            "state": "unavailable",
+            "installed": false
+          },
+          "letta": {
+            "state": "unavailable",
+            "installed": false
+          },
+          "olcap-text-extract": {
+            "state": "healthy",
+            "installed": true
+          },
+          "pypdf": {
+            "state": "healthy",
+            "installed": true
+          },
+          "python-docx": {
+            "state": "healthy",
+            "installed": true
+          },
+          "docling": {
+            "state": "unavailable",
+            "installed": false
+          },
+          "unstructured": {
+            "state": "unavailable",
+            "installed": false
+          },
+          "marker": {
+            "state": "unavailable",
+            "installed": false
+          },
+          "duckdb": {
+            "state": "healthy",
+            "installed": true
+          },
+          "pgvector": {
+            "state": "unavailable",
+            "installed": false
+          },
+          "olcap-workflows": {
+            "state": "healthy",
+            "installed": true
+          },
+          "prefect": {
+            "state": "unavailable",
+            "installed": false
+          },
+          "temporal": {
+            "state": "unavailable",
+            "installed": false
+          },
+          "langgraph": {
+            "state": "unavailable",
+            "installed": false
+          },
+          "crewai": {
+            "state": "unavailable",
+            "installed": false
+          },
+          "ag2-autogen": {
+            "state": "unavailable",
+            "installed": false
+          },
+          "smolagents": {
+            "state": "unavailable",
+            "installed": false
+          },
+          "openhands": {
+            "state": "unavailable",
+            "installed": false
+          },
+          "praisonai": {
+            "state": "unavailable",
+            "installed": false
+          },
+          "agentscope": {
+            "state": "unavailable",
+            "installed": false
+          },
+          "olcap-os-adapter": {
+            "state": "healthy",
+            "installed": true
+          },
+          "pywin32": {
+            "state": "unavailable",
+            "installed": false
+          },
+          "pyautogui": {
+            "state": "unavailable",
+            "installed": false
+          },
+          "pillow": {
+            "state": "healthy",
+            "installed": true
+          },
+          "opentelemetry": {
+            "state": "healthy",
+            "installed": true
+          },
+          "phoenix": {
+            "state": "unavailable",
+            "installed": false
+          },
+          "langfuse": {
+            "state": "unavailable",
+            "installed": false
+          },
+          "ragas": {
+            "state": "unavailable",
+            "installed": false
+          },
+          "promptfoo": {
+            "state": "healthy",
+            "installed": true
+          },
+          "scikit-learn": {
+            "state": "healthy",
+            "installed": true
+          },
+          "llama-cpp-python": {
+            "state": "unavailable",
+            "installed": false
+          },
+          "ollama": {
+            "state": "unavailable",
+            "installed": false
+          },
+          "olcap-observability": {
+            "state": "healthy",
+            "installed": true
+          },
+          "olcap-verification": {
+            "state": "healthy",
+            "installed": true
+          },
+          "olcap-deterministic-router": {
+            "state": "healthy",
+            "installed": true
+          }
+        }
+      }
+    },
+    "20": {
+      "name": "generate readiness report",
+      "ok": false,
+      "error": "ModuleNotFoundError: No module named 'olcap.setup.readiness'"
+    }
+  },
+  "duration_s": 5.6,
+  "platform": "linux"
+}

@@ -1,0 +1,1287 @@
+# =============================================================================
+# COMPONENT CATALOG - every implementation the system may use.
+#
+# provenance_verified is intentionally null until `olcap-verify-provenance` runs
+# and checks the repository / license / maintenance against the GitHub API.
+# Nothing here is assumed to be true; it is all CHECKED.
+#
+# paid: true  =>  may require a paid account to operate. Such components can
+#                 never become mandatory (they are always `optional: true` and
+#                 always have a free fallback).
+# =============================================================================
+
+components:
+
+  # ---------------------------------------------------------------- SEARCH ---
+  - id: olcap-search-core
+    name: OLCAP Multi-Engine Search
+    category: search
+    capabilities: [WEB_SEARCH]
+    provides: [WEB_SEARCH, SOURCE_DISCOVERY, SOURCE_COMPARISON]
+    repository: ""
+    documentation: "docs/TOOLS.md#olcap-search-core"
+    owner: olcap
+    license: Apache-2.0
+    version: "1.0"
+    maintenance: local
+    integration: builtin
+    install_method: builtin
+    platforms: [windows, linux]
+    api_requirements: []
+    paid: false
+    self_hosted: true
+    jit: false
+    resource_mb: 32
+    permissions: [network]
+    notes: >-
+      Federated search over DuckDuckGo HTML, Wikipedia/Wikidata API, optional
+      HackerNews (Algolia) and any SearXNG instance. No API key, no cost.
+
+  - id: searxng
+    name: SearXNG (self-hosted metasearch)
+    category: search
+    capabilities: [WEB_SEARCH]
+    provides: [WEB_SEARCH]
+    repository: https://github.com/searxng/searxng
+    documentation: https://docs.searxng.org/
+    owner: searxng
+    license: AGPL-3.0
+    integration: service
+    install_method: docker
+    install_target: searxng/searxng:latest
+    healthcheck: "http://{host}/healthz"
+    platforms: [windows, linux]
+    runtimes: [docker]
+    paid: false
+    self_hosted: true
+    jit: true
+    resource_mb: 512
+    permissions: [network]
+    optional: true
+    fallback_for: [olcap-search-core]
+
+  # ------------------------------------------------------------ FETCH/CRAWL ---
+  - id: olcap-fetch
+    name: OLCAP HTTP Fetcher
+    category: fetch
+    capabilities: [WEB_BROWSE]
+    provides: [WEB_BROWSE]
+    documentation: "docs/TOOLS.md#olcap-fetch"
+    owner: olcap
+    license: Apache-2.0
+    integration: builtin
+    install_method: builtin
+    platforms: [windows, linux]
+    paid: false
+    self_hosted: true
+    jit: false
+    resource_mb: 24
+    permissions: [network]
+
+  - id: trafilatura
+    name: Trafilatura (content extraction)
+    category: extract
+    capabilities: [WEB_EXTRACT, DOCUMENT_INTELLIGENCE]
+    provides: [WEB_EXTRACT, DOCUMENT_INTELLIGENCE]
+    repository: https://github.com/adbar/trafilatura
+    documentation: https://trafilatura.readthedocs.io/
+    owner: adbar
+    license: Apache-2.0
+    license_verified: "2026-08-30 via GitHub API (upstream relicensed from GPL-3.0)"
+    integration: library
+    install_method: python
+    install_target: trafilatura
+    python_module: trafilatura
+    platforms: [windows, linux]
+    paid: false
+    self_hosted: true
+    jit: false
+    resource_mb: 96
+    permissions: [network]
+
+  - id: olcap-crawler
+    name: OLCAP Recursive Crawler
+    category: crawl
+    capabilities: [WEB_CRAWL]
+    provides: [WEB_CRAWL]
+    documentation: "docs/TOOLS.md#olcap-crawler"
+    owner: olcap
+    license: Apache-2.0
+    integration: builtin
+    install_method: builtin
+    platforms: [windows, linux]
+    paid: false
+    self_hosted: true
+    jit: true
+    resource_mb: 128
+    permissions: [network]
+
+  - id: crawl4ai
+    name: Crawl4AI
+    category: crawl
+    capabilities: [WEB_CRAWL, WEB_EXTRACT]
+    provides: [WEB_CRAWL, WEB_EXTRACT]
+    repository: https://github.com/unclecode/crawl4ai
+    documentation: https://docs.crawl4ai.com/
+    owner: unclecode
+    license: Apache-2.0
+    integration: library
+    install_method: python
+    install_target: crawl4ai
+    python_module: crawl4ai
+    platforms: [windows, linux]
+    runtimes: [python>=3.10]
+    paid: false
+    self_hosted: true
+    jit: true
+    resource_mb: 900
+    permissions: [network]
+    optional: true
+    fallback_for: [olcap-crawler]
+
+  - id: firecrawl
+    name: Firecrawl (self-hosted)
+    category: crawl
+    capabilities: [WEB_CRAWL, WEB_EXTRACT]
+    provides: [WEB_CRAWL]
+    repository: https://github.com/firecrawl/firecrawl
+    documentation: https://docs.firecrawl.dev/
+    owner: firecrawl
+    license: AGPL-3.0
+    integration: service
+    install_method: docker
+    install_target: firecrawl
+    platforms: [windows, linux]
+    runtimes: [docker, node]
+    api_requirements: [FIRECRAWL_API_KEY (hosted tier only)]
+    paid: false
+    paid_note: "Self-hosting is free/open; the hosted SaaS tier is paid and optional."
+    self_hosted: true
+    jit: true
+    resource_mb: 1024
+    optional: true
+    permissions: [network]
+    fallback_for: [olcap-crawler]
+
+  - id: jina-reader
+    name: Jina Reader
+    category: extract
+    capabilities: [WEB_EXTRACT, WEB_BROWSE]
+    provides: [WEB_EXTRACT]
+    repository: https://github.com/jina-ai/reader
+    documentation: https://jina.ai/reader
+    owner: jina-ai
+    license: Apache-2.0
+    integration: service
+    install_method: service
+    install_target: https://r.jina.ai/
+    platforms: [windows, linux]
+    api_requirements: ["JINA_API_KEY (optional; free tier without key is rate limited)"]
+    paid: false
+    paid_note: "Anonymous rate-limited usage is free; key raises limits."
+    self_hosted: false
+    jit: false
+    resource_mb: 16
+    optional: true
+    permissions: [network]
+    fallback_for: [trafilatura]
+
+  # -------------------------------------------------------------- BROWSING ---
+  - id: playwright
+    name: Microsoft Playwright
+    category: browser
+    capabilities: [WEB_INTERACT, GUI]
+    provides: [WEB_INTERACT, SCREENSHOT]
+    repository: https://github.com/microsoft/playwright
+    documentation: https://playwright.dev/python/
+    owner: microsoft
+    license: Apache-2.0
+    integration: library
+    install_method: python
+    install_target: playwright
+    python_module: playwright
+    platforms: [windows, linux]
+    runtimes: [python>=3.9]
+    paid: false
+    self_hosted: true
+    jit: true
+    resource_mb: 420
+    permissions: [network, execute, read]
+    post_install: ["playwright install chromium"]
+
+  - id: browser-use
+    name: browser-use
+    category: browser
+    capabilities: [WEB_INTERACT]
+    provides: [WEB_INTERACT]
+    repository: https://github.com/browser-use/browser-use
+    documentation: https://docs.browser-use.com/
+    owner: browser-use
+    license: MIT
+    integration: library
+    install_method: python
+    install_target: browser-use
+    python_module: browser_use
+    platforms: [windows, linux]
+    paid: false
+    self_hosted: true
+    jit: true
+    resource_mb: 600
+    optional: true
+    permissions: [network, execute]
+    fallback_for: [playwright]
+    notes: "Needs an LLM driver; uses the OpenCode model path, never a local mandatory model."
+
+  - id: stagehand
+    name: Stagehand
+    category: browser
+    capabilities: [WEB_INTERACT]
+    provides: [WEB_INTERACT]
+    repository: https://github.com/browserbase/stagehand
+    documentation: https://docs.stagehand.dev/
+    owner: browserbase
+    license: MIT
+    integration: library
+    install_method: node
+    install_target: "@browserbasehq/stagehand"
+    platforms: [windows, linux]
+    runtimes: [node>=18]
+    api_requirements: ["Browserbase key only for hosted cloud browsers - not required locally"]
+    paid: false
+    paid_note: "Local Chromium via Playwright is free; Browserbase cloud is optional/paid."
+    self_hosted: true
+    jit: true
+    resource_mb: 420
+    optional: true
+    permissions: [network, execute]
+    fallback_for: [playwright]
+
+  # -------------------------------------------------------------- RESEARCH ---
+  - id: olcap-research-engine
+    name: OLCAP Research Engine
+    category: research
+    capabilities: [RESEARCH, SOURCE_VERIFICATION]
+    provides: [RESEARCH, SOURCE_VERIFICATION]
+    documentation: "docs/TOOLS.md#olcap-research-engine"
+    owner: olcap
+    license: Apache-2.0
+    integration: builtin
+    install_method: builtin
+    platforms: [windows, linux]
+    paid: false
+    self_hosted: true
+    jit: false
+    resource_mb: 128
+    permissions: [network]
+
+  - id: gpt-researcher
+    name: GPT Researcher
+    category: research
+    capabilities: [RESEARCH]
+    provides: [RESEARCH]
+    repository: https://github.com/assafelovic/gpt-researcher
+    documentation: https://docs.gptr.dev/
+    owner: assafelovic
+    license: Apache-2.0
+    integration: library
+    install_method: python
+    install_target: gpt-researcher
+    python_module: gpt_researcher
+    platforms: [windows, linux]
+    api_requirements: ["LLM provider key (reuses OpenCode model credentials)"]
+    paid: false
+    self_hosted: true
+    jit: true
+    resource_mb: 700
+    optional: true
+    permissions: [network]
+    fallback_for: [olcap-research-engine]
+
+  - id: open-deep-search
+    name: Open Deep Search (ODS)
+    category: research
+    capabilities: [RESEARCH]
+    provides: [RESEARCH]
+    repository: https://github.com/sentient-agi/OpenDeepSearch
+    documentation: https://github.com/sentient-agi/OpenDeepSearch
+    owner: sentient-agi
+    license: Apache-2.0
+    integration: library
+    install_method: python
+    install_target: open-deep-search
+    python_module: opendeepsearch
+    maintenance: "stale - upstream last pushed ~512 days ago (verified 2026-08-30)"
+    platforms: [windows, linux]
+    paid: false
+    self_hosted: true
+    jit: true
+    resource_mb: 700
+    optional: true
+    permissions: [network]
+    fallback_for: [olcap-research-engine]
+
+  - id: mindsearch
+    name: MindSearch
+    category: research
+    capabilities: [RESEARCH]
+    provides: [RESEARCH]
+    repository: https://github.com/InternLM/MindSearch
+    documentation: https://github.com/InternLM/MindSearch
+    owner: InternLM
+    license: Apache-2.0
+    integration: library
+    install_method: source
+    install_target: https://github.com/InternLM/MindSearch.git
+    platforms: [windows, linux]
+    paid: false
+    self_hosted: true
+    jit: true
+    resource_mb: 900
+    optional: true
+    maintenance: "stale - upstream last pushed ~422 days ago (verified 2026-08-30)"
+    permissions: [network]
+    fallback_for: [olcap-research-engine]
+
+  - id: perplexica
+    name: Perplexica
+    category: research
+    capabilities: [RESEARCH, WEB_SEARCH]
+    provides: [RESEARCH, WEB_SEARCH]
+    repository: https://github.com/ItzCrazyKns/Perplexica
+    documentation: https://github.com/ItzCrazyKns/Perplexica
+    owner: ItzCrazyKns
+    license: MIT
+    integration: service
+    install_method: docker
+    install_target: itzcrazykns1337/perplexica:main
+    platforms: [windows, linux]
+    runtimes: [docker]
+    paid: false
+    self_hosted: true
+    jit: true
+    resource_mb: 1024
+    optional: true
+    permissions: [network]
+    fallback_for: [olcap-research-engine]
+
+  # -------------------------------------------------------------------- RAG ---
+  - id: olcap-rag
+    name: OLCAP Hybrid RAG (BM25 + vector)
+    category: rag
+    capabilities: [RAG, KNOWLEDGE_SEARCH]
+    provides: [RAG, KNOWLEDGE_SEARCH]
+    documentation: "docs/TOOLS.md#olcap-rag"
+    owner: olcap
+    license: Apache-2.0
+    integration: builtin
+    install_method: builtin
+    platforms: [windows, linux]
+    paid: false
+    self_hosted: true
+    jit: false
+    resource_mb: 160
+    permissions: [read, write]
+
+  - id: sqlite-vec
+    name: sqlite-vec
+    category: vector
+    capabilities: [VECTOR_STORAGE]
+    provides: [VECTOR_STORAGE]
+    repository: https://github.com/asg017/sqlite-vec
+    documentation: https://alexgarcia.xyz/sqlite-vec/
+    owner: asg017
+    license: "MIT (dual: also under Apache-2.0 at user's option)"
+    integration: library
+    install_method: python
+    install_target: sqlite-vec
+    python_module: sqlite_vec
+    platforms: [windows, linux]
+    paid: false
+    self_hosted: true
+    jit: false
+    resource_mb: 32
+    permissions: [read, write]
+
+  - id: qdrant
+    name: Qdrant (local mode + server)
+    category: vector
+    capabilities: [VECTOR_STORAGE]
+    provides: [VECTOR_STORAGE]
+    repository: https://github.com/qdrant/qdrant
+    documentation: https://qdrant.tech/documentation/
+    owner: qdrant
+    license: Apache-2.0
+    integration: library
+    install_method: python
+    install_target: qdrant-client
+    python_module: qdrant_client
+    platforms: [windows, linux]
+    paid: false
+    paid_note: "Embedded/local mode is free; Qdrant Cloud is optional paid."
+    self_hosted: true
+    jit: true
+    resource_mb: 320
+    permissions: [read, write]
+    fallback_for: [sqlite-vec]
+
+  - id: chroma
+    name: Chroma
+    category: vector
+    capabilities: [VECTOR_STORAGE]
+    provides: [VECTOR_STORAGE]
+    repository: https://github.com/chroma-core/chroma
+    documentation: https://docs.trychroma.com/
+    owner: chroma-core
+    license: Apache-2.0
+    integration: library
+    install_method: python
+    install_target: chromadb
+    python_module: chromadb
+    platforms: [windows, linux]
+    paid: false
+    self_hosted: true
+    jit: true
+    resource_mb: 640
+    optional: true
+    permissions: [read, write]
+    fallback_for: [sqlite-vec]
+
+  - id: llamaindex
+    name: LlamaIndex
+    category: rag
+    capabilities: [RAG, DOCUMENT_INTELLIGENCE]
+    provides: [RAG]
+    repository: https://github.com/run-llama/llama_index
+    documentation: https://docs.llamaindex.ai/
+    owner: run-llama
+    license: MIT
+    integration: library
+    install_method: python
+    install_target: llama-index-core
+    python_module: llama_index.core
+    platforms: [windows, linux]
+    paid: false
+    self_hosted: true
+    jit: true
+    resource_mb: 700
+    optional: true
+    permissions: [read, write]
+    fallback_for: [olcap-rag]
+
+  - id: haystack
+    name: Haystack (deepset)
+    category: rag
+    capabilities: [RAG, DOCUMENT_INTELLIGENCE]
+    provides: [RAG]
+    repository: https://github.com/deepset-ai/haystack
+    documentation: https://docs.haystack.deepset.ai/
+    owner: deepset-ai
+    license: Apache-2.0
+    integration: library
+    install_method: python
+    install_target: haystack-ai
+    python_module: haystack
+    platforms: [windows, linux]
+    paid: false
+    self_hosted: true
+    jit: true
+    resource_mb: 700
+    optional: true
+    permissions: [read, write]
+    fallback_for: [olcap-rag]
+
+  - id: ragflow
+    name: RAGFlow
+    category: rag
+    capabilities: [RAG, DOCUMENT_INTELLIGENCE]
+    provides: [RAG]
+    repository: https://github.com/infiniflow/ragflow
+    documentation: https://ragflow.io/docs/dev/
+    owner: infiniflow
+    license: Apache-2.0
+    integration: service
+    install_method: docker
+    install_target: infiniflow/ragflow
+    platforms: [windows, linux]
+    runtimes: [docker]
+    paid: false
+    self_hosted: true
+    jit: true
+    resource_mb: 4096
+    optional: true
+    permissions: [read, write]
+    fallback_for: [olcap-rag]
+
+  - id: anythingllm
+    name: AnythingLLM
+    category: rag
+    capabilities: [RAG, DOCUMENT_INTELLIGENCE]
+    provides: [RAG]
+    repository: https://github.com/Mintplex-Labs/anything-llm
+    documentation: https://docs.anythingllm.com/
+    owner: Mintplex-Labs
+    license: MIT
+    integration: service
+    install_method: docker
+    install_target: mintplexlabs/anythingllm
+    platforms: [windows, linux]
+    runtimes: [docker]
+    paid: false
+    self_hosted: true
+    jit: true
+    resource_mb: 2048
+    optional: true
+    permissions: [read, write]
+    fallback_for: [olcap-rag]
+
+  # ---------------------------------------------------------------- MEMORY ---
+  - id: olcap-memory
+    name: OLCAP Memory (episodic/semantic/procedural)
+    category: memory
+    capabilities: [MEMORY]
+    provides: [MEMORY]
+    documentation: "docs/TOOLS.md#olcap-memory"
+    owner: olcap
+    license: Apache-2.0
+    integration: builtin
+    install_method: builtin
+    platforms: [windows, linux]
+    paid: false
+    self_hosted: true
+    jit: false
+    resource_mb: 64
+    permissions: [read, write]
+
+  - id: mem0
+    name: Mem0
+    category: memory
+    capabilities: [MEMORY]
+    provides: [MEMORY]
+    repository: https://github.com/mem0ai/mem0
+    documentation: https://docs.mem0.ai/
+    owner: mem0ai
+    license: Apache-2.0
+    integration: library
+    install_method: python
+    install_target: mem0ai
+    python_module: mem0
+    platforms: [windows, linux]
+    paid: false
+    paid_note: "Open-source self-hosted is free; Mem0 hosted platform is optional paid."
+    self_hosted: true
+    jit: true
+    resource_mb: 512
+    optional: true
+    permissions: [read, write]
+    fallback_for: [olcap-memory]
+
+  - id: cognee
+    name: Cognee
+    category: memory
+    capabilities: [MEMORY, KNOWLEDGE_SEARCH]
+    provides: [MEMORY]
+    repository: https://github.com/topoteretes/cognee
+    documentation: https://docs.cognee.ai/
+    owner: topoteretes
+    license: Apache-2.0
+    integration: library
+    install_method: python
+    install_target: cognee
+    python_module: cognee
+    platforms: [windows, linux]
+    paid: false
+    self_hosted: true
+    jit: true
+    resource_mb: 900
+    optional: true
+    permissions: [read, write]
+    fallback_for: [olcap-memory]
+
+  - id: graphiti
+    name: Graphiti (Zep)
+    category: memory
+    capabilities: [MEMORY]
+    provides: [MEMORY]
+    repository: https://github.com/getzep/graphiti
+    documentation: https://help.getzep.com/graphiti/graphiti/overview
+    owner: getzep
+    license: Apache-2.0
+    integration: library
+    install_method: python
+    install_target: graphiti-core
+    python_module: graphiti_core
+    platforms: [windows, linux]
+    runtimes: ["neo4j (optional)"]
+    paid: false
+    self_hosted: true
+    jit: true
+    resource_mb: 800
+    optional: true
+    permissions: [read, write]
+    fallback_for: [olcap-memory]
+
+  - id: letta
+    name: Letta (self-hosted)
+    category: memory
+    capabilities: [MEMORY]
+    provides: [MEMORY]
+    repository: https://github.com/letta-ai/letta
+    documentation: https://docs.letta.com/
+    owner: letta-ai
+    license: Apache-2.0
+    integration: service
+    install_method: docker
+    install_target: letta/letta:latest
+    platforms: [windows, linux]
+    runtimes: [docker]
+    paid: false
+    self_hosted: true
+    jit: true
+    resource_mb: 2048
+    optional: true
+    permissions: [read, write]
+    fallback_for: [olcap-memory]
+
+  # ------------------------------------------------------------- DOCUMENTS ---
+  - id: olcap-text-extract
+    name: OLCAP Text/Markdown Extractor
+    category: document
+    capabilities: [DOCUMENT_INTELLIGENCE]
+    provides: [DOCUMENT_INTELLIGENCE]
+    documentation: "docs/TOOLS.md#olcap-text-extract"
+    owner: olcap
+    license: Apache-2.0
+    integration: builtin
+    install_method: builtin
+    platforms: [windows, linux]
+    paid: false
+    self_hosted: true
+    jit: false
+    resource_mb: 24
+    permissions: [read]
+    notes: >-
+      Direct reader for txt/md/markdown/rst/log/json/csv/tsv/yaml/html/xml.
+      Used whenever the target is already text - no heavyweight parser needed.
+
+  - id: pypdf
+    name: pypdf
+    category: document
+    capabilities: [DOCUMENT_INTELLIGENCE]
+    provides: [DOCUMENT_INTELLIGENCE]
+    repository: https://github.com/py-pdf/pypdf
+    documentation: https://pypdf.readthedocs.io/
+    owner: py-pdf
+    license: "BSD-3-Clause"
+    integration: library
+    install_method: python
+    install_target: pypdf
+    python_module: pypdf
+    platforms: [windows, linux]
+    paid: false
+    self_hosted: true
+    jit: false
+    resource_mb: 48
+    permissions: [read]
+
+  - id: python-docx
+    name: python-docx
+    category: document
+    capabilities: [DOCUMENT_INTELLIGENCE]
+    provides: [DOCUMENT_INTELLIGENCE]
+    repository: https://github.com/python-openxml/python-docx
+    documentation: https://python-docx.readthedocs.io/
+    owner: python-openxml
+    license: MIT
+    integration: library
+    install_method: python
+    install_target: python-docx
+    python_module: docx
+    platforms: [windows, linux]
+    paid: false
+    self_hosted: true
+    jit: false
+    resource_mb: 48
+    permissions: [read]
+
+  - id: docling
+    name: Docling (IBM)
+    category: document
+    capabilities: [DOCUMENT_INTELLIGENCE]
+    provides: [DOCUMENT_INTELLIGENCE]
+    repository: https://github.com/docling-project/docling
+    documentation: https://docling-project.github.io/docling/
+    owner: docling-project
+    license: MIT
+    integration: library
+    install_method: python
+    install_target: docling
+    python_module: docling
+    platforms: [windows, linux]
+    runtimes: [python>=3.9]
+    paid: false
+    self_hosted: true
+    jit: true
+    resource_mb: 3000
+    optional: true
+    permissions: [read, write]
+    fallback_for: [pypdf]
+
+  - id: unstructured
+    name: Unstructured
+    category: document
+    capabilities: [DOCUMENT_INTELLIGENCE]
+    provides: [DOCUMENT_INTELLIGENCE]
+    repository: https://github.com/Unstructured-IO/unstructured
+    documentation: https://docs.unstructured.io/
+    owner: Unstructured-IO
+    license: Apache-2.0
+    integration: library
+    install_method: python
+    install_target: unstructured
+    python_module: unstructured
+    platforms: [windows, linux]
+    paid: false
+    paid_note: "Open-source library is free; Unstructured hosted API is optional paid."
+    self_hosted: true
+    jit: true
+    resource_mb: 1500
+    optional: true
+    permissions: [read, write]
+    fallback_for: [pypdf]
+
+  - id: marker
+    name: Marker
+    category: document
+    capabilities: [DOCUMENT_INTELLIGENCE]
+    provides: [DOCUMENT_INTELLIGENCE]
+    repository: https://github.com/datalab-to/marker
+    documentation: https://github.com/datalab-to/marker
+    owner: datalab-to
+    license: Apache-2.0
+    license_verified: "2026-08-30 via GitHub API (repo moved from VikParuchuri/marker and relicensed)"
+    integration: library
+    install_method: python
+    install_target: marker-pdf
+    python_module: marker
+    platforms: [windows, linux]
+    paid: false
+    self_hosted: true
+    jit: true
+    resource_mb: 3000
+    optional: true
+    permissions: [read, write]
+    fallback_for: [pypdf]
+
+  # ------------------------------------------------------------------ DATA ---
+  - id: duckdb
+    name: DuckDB
+    category: database
+    capabilities: [DATA_ANALYSIS, DATABASE_QUERY]
+    provides: [DATA_ANALYSIS, DATABASE_QUERY]
+    repository: https://github.com/duckdb/duckdb
+    documentation: https://duckdb.org/docs/
+    owner: duckdb
+    license: MIT
+    integration: library
+    install_method: python
+    install_target: duckdb
+    python_module: duckdb
+    platforms: [windows, linux]
+    paid: false
+    self_hosted: true
+    jit: false
+    resource_mb: 180
+    permissions: [read, write]
+
+  - id: pgvector
+    name: pgvector
+    category: database
+    capabilities: [DATABASE_QUERY, VECTOR_STORAGE]
+    provides: [DATABASE_QUERY, VECTOR_STORAGE]
+    repository: https://github.com/pgvector/pgvector
+    documentation: https://github.com/pgvector/pgvector
+    owner: pgvector
+    license: "PostgreSQL License"
+    integration: service
+    install_method: service
+    install_target: "PostgreSQL extension: CREATE EXTENSION vector;"
+    platforms: [windows, linux]
+    runtimes: [postgresql]
+    paid: false
+    self_hosted: true
+    jit: true
+    resource_mb: 512
+    optional: true
+    permissions: [read, write]
+    fallback_for: [duckdb, sqlite-vec]
+
+  # ------------------------------------------------------------ AUTOMATION ---
+  - id: olcap-workflows
+    name: OLCAP Durable Workflow Engine
+    category: automation
+    capabilities: [WORKFLOW_EXECUTION, DURABLE_TASKS]
+    provides: [WORKFLOW_EXECUTION, DURABLE_TASKS]
+    documentation: "docs/TOOLS.md#olcap-workflows"
+    owner: olcap
+    license: Apache-2.0
+    integration: builtin
+    install_method: builtin
+    platforms: [windows, linux]
+    paid: false
+    self_hosted: true
+    jit: false
+    resource_mb: 64
+    permissions: [read, write, execute]
+
+  - id: prefect
+    name: Prefect
+    category: automation
+    capabilities: [WORKFLOW_EXECUTION, DURABLE_TASKS]
+    provides: [WORKFLOW_EXECUTION]
+    repository: https://github.com/PrefectHQ/prefect
+    documentation: https://docs.prefect.io/
+    owner: PrefectHQ
+    license: Apache-2.0
+    integration: library
+    install_method: python
+    install_target: prefect
+    python_module: prefect
+    platforms: [windows, linux]
+    paid: false
+    paid_note: "OSS self-hosted is free; Prefect Cloud is optional paid."
+    self_hosted: true
+    jit: true
+    resource_mb: 900
+    optional: true
+    permissions: [read, write, execute]
+    fallback_for: [olcap-workflows]
+
+  - id: temporal
+    name: Temporal
+    category: automation
+    capabilities: [WORKFLOW_EXECUTION, DURABLE_TASKS]
+    provides: [WORKFLOW_EXECUTION]
+    repository: https://github.com/temporalio/temporal
+    documentation: https://docs.temporal.io/
+    owner: temporalio
+    license: MIT
+    integration: service
+    install_method: docker
+    install_target: temporalio/auto-setup
+    platforms: [windows, linux]
+    runtimes: [docker]
+    paid: false
+    self_hosted: true
+    jit: true
+    resource_mb: 2048
+    optional: true
+    permissions: [read, write, execute]
+    fallback_for: [olcap-workflows]
+
+  # ----------------------------------------------------------- AGENT ENGINES ---
+  - id: langgraph
+    name: LangGraph
+    category: agent_engine
+    capabilities: [WORKFLOW_EXECUTION]
+    provides: []
+    repository: https://github.com/langchain-ai/langgraph
+    documentation: https://langchain-ai.github.io/langgraph/
+    owner: langchain-ai
+    license: MIT
+    integration: library
+    install_method: python
+    install_target: langgraph
+    python_module: langgraph
+    platforms: [windows, linux]
+    paid: false
+    self_hosted: true
+    jit: true
+    resource_mb: 400
+    optional: true
+    permissions: [read, write, execute]
+
+  - id: crewai
+    name: CrewAI
+    category: agent_engine
+    capabilities: [WORKFLOW_EXECUTION]
+    provides: []
+    repository: https://github.com/crewAIInc/crewAI
+    documentation: https://docs.crewai.com/
+    owner: crewAIInc
+    license: MIT
+    integration: library
+    install_method: python
+    install_target: crewai
+    python_module: crewai
+    platforms: [windows, linux]
+    paid: false
+    self_hosted: true
+    jit: true
+    resource_mb: 500
+    optional: true
+    permissions: [read, write, execute]
+
+  - id: ag2-autogen
+    name: AG2 (AutoGen)
+    category: agent_engine
+    capabilities: [WORKFLOW_EXECUTION]
+    provides: []
+    repository: https://github.com/ag2ai/ag2
+    documentation: https://docs.ag2.ai/
+    owner: ag2ai
+    license: Apache-2.0
+    integration: library
+    install_method: python
+    install_target: ag2
+    python_module: autogen
+    platforms: [windows, linux]
+    paid: false
+    self_hosted: true
+    jit: true
+    resource_mb: 500
+    optional: true
+    permissions: [read, write, execute]
+
+  - id: smolagents
+    name: smolagents (Hugging Face)
+    category: agent_engine
+    capabilities: [WORKFLOW_EXECUTION]
+    provides: []
+    repository: https://github.com/huggingface/smolagents
+    documentation: https://huggingface.co/docs/smolagents
+    owner: huggingface
+    license: Apache-2.0
+    integration: library
+    install_method: python
+    install_target: smolagents
+    python_module: smolagents
+    platforms: [windows, linux]
+    paid: false
+    self_hosted: true
+    jit: true
+    resource_mb: 400
+    optional: true
+    permissions: [read, write, execute]
+
+  - id: openhands
+    name: OpenHands
+    category: agent_engine
+    capabilities: [COMPUTER_USE, WORKFLOW_EXECUTION]
+    provides: [COMPUTER_USE]
+    repository: https://github.com/All-Hands-AI/OpenHands
+    documentation: https://docs.all-hands.dev/
+    owner: All-Hands-AI
+    license: MIT
+    integration: service
+    install_method: docker
+    install_target: docker.all-hands.dev/all-hands-ai/runtime
+    platforms: [windows, linux]
+    runtimes: [docker]
+    paid: false
+    self_hosted: true
+    jit: true
+    resource_mb: 4096
+    optional: true
+    permissions: [execute, read, write, network]
+    fallback_for: [olcap-os-adapter]
+
+  - id: praisonai
+    name: PraisonAI
+    category: agent_engine
+    capabilities: [WORKFLOW_EXECUTION]
+    provides: []
+    repository: https://github.com/MervinPraison/PraisonAI
+    documentation: https://docs.praison.ai/
+    owner: MervinPraison
+    license: MIT
+    integration: library
+    install_method: python
+    install_target: praisonai
+    python_module: praisonai
+    platforms: [windows, linux]
+    paid: false
+    self_hosted: true
+    jit: true
+    resource_mb: 500
+    optional: true
+    permissions: [read, write, execute]
+
+  - id: agentscope
+    name: AgentScope
+    category: agent_engine
+    capabilities: [WORKFLOW_EXECUTION]
+    provides: []
+    repository: https://github.com/modelscope/agentscope
+    documentation: https://doc.agentscope.io/
+    owner: modelscope
+    license: Apache-2.0
+    integration: library
+    install_method: python
+    install_target: agentscope
+    python_module: agentscope
+    platforms: [windows, linux]
+    paid: false
+    self_hosted: true
+    jit: true
+    resource_mb: 600
+    optional: true
+    permissions: [read, write, execute]
+
+  # ------------------------------------------------------------------- OS ----
+  - id: olcap-os-adapter
+    name: OLCAP OS Adapter (Windows/Linux)
+    category: os
+    capabilities: [WINDOWS_CONTROL, FILESYSTEM, PROCESS_CONTROL, TERMINAL, GUI, SCREENSHOT, WINDOW_MANAGEMENT, COMPUTER_USE]
+    provides: [COMPUTER_USE]
+    documentation: "docs/TOOLS.md#olcap-os-adapter"
+    owner: olcap
+    license: Apache-2.0
+    integration: builtin
+    install_method: builtin
+    platforms: [windows, linux]
+    paid: false
+    self_hosted: true
+    jit: false
+    resource_mb: 64
+    permissions: [read, write, execute]
+
+  - id: pywin32
+    name: pywin32 (Windows native APIs)
+    category: os
+    capabilities: [WINDOWS_CONTROL, WINDOW_MANAGEMENT, PROCESS_CONTROL]
+    provides: [WINDOWS_CONTROL]
+    repository: https://github.com/mhammond/pywin32
+    documentation: https://mhammond.github.io/pywin32/
+    owner: mhammond
+    license: "PSF-2.0"
+    integration: library
+    install_method: python
+    install_target: pywin32
+    python_module: win32gui
+    platforms: [windows]
+    paid: false
+    self_hosted: true
+    jit: false
+    resource_mb: 64
+    optional: true
+    permissions: [read, write, execute]
+
+  - id: pyautogui
+    name: PyAutoGUI (GUI automation)
+    category: os
+    capabilities: [GUI, SCREENSHOT, COMPUTER_USE]
+    provides: [GUI]
+    repository: https://github.com/asweigart/pyautogui
+    documentation: https://pyautogui.readthedocs.io/
+    owner: asweigart
+    license: "BSD-3-Clause"
+    integration: library
+    install_method: python
+    install_target: pyautogui
+    python_module: pyautogui
+    platforms: [windows, linux]
+    maintenance: "dormant - upstream last pushed ~739 days ago (verified 2026-08-30)"
+    paid: false
+    self_hosted: true
+    jit: true
+    resource_mb: 180
+    optional: true
+    permissions: [execute]
+    notes: "On Linux requires an X display; headless environments report degraded."
+
+  - id: pillow
+    name: Pillow (imaging / screenshots)
+    category: os
+    capabilities: [SCREENSHOT]
+    provides: [SCREENSHOT]
+    repository: https://github.com/python-pillow/Pillow
+    documentation: https://pillow.readthedocs.io/
+    owner: python-pillow
+    license: "HPND"
+    integration: library
+    install_method: python
+    install_target: pillow
+    python_module: PIL
+    platforms: [windows, linux]
+    paid: false
+    self_hosted: true
+    jit: false
+    resource_mb: 96
+    optional: true
+    permissions: [read, write]
+
+  # ---------------------------------------------------------- OBSERVABILITY ---
+  - id: opentelemetry
+    name: OpenTelemetry
+    category: observability
+    capabilities: [OBSERVABILITY]
+    provides: [OBSERVABILITY]
+    repository: https://github.com/open-telemetry/opentelemetry-python
+    documentation: https://opentelemetry.io/docs/languages/python/
+    owner: open-telemetry
+    license: Apache-2.0
+    integration: library
+    install_method: python
+    install_target: "opentelemetry-api opentelemetry-sdk"
+    python_module: opentelemetry
+    platforms: [windows, linux]
+    paid: false
+    self_hosted: true
+    jit: false
+    resource_mb: 96
+    optional: true
+    permissions: [write]
+
+  - id: phoenix
+    name: Arize Phoenix
+    category: observability
+    capabilities: [OBSERVABILITY, VERIFICATION]
+    provides: [OBSERVABILITY]
+    repository: https://github.com/Arize-ai/phoenix
+    documentation: https://docs.arize.com/phoenix
+    owner: Arize-ai
+    license: "Elastic-2.0"
+    integration: service
+    install_method: python
+    install_target: arize-phoenix
+    python_module: phoenix
+    platforms: [windows, linux]
+    paid: false
+    self_hosted: true
+    jit: true
+    resource_mb: 900
+    optional: true
+    permissions: [write]
+
+  - id: langfuse
+    name: Langfuse
+    category: observability
+    capabilities: [OBSERVABILITY]
+    provides: [OBSERVABILITY]
+    repository: https://github.com/langfuse/langfuse
+    documentation: https://langfuse.com/docs
+    owner: langfuse
+    license: MIT
+    integration: service
+    install_method: docker
+    install_target: langfuse/langfuse
+    platforms: [windows, linux]
+    runtimes: [docker]
+    paid: false
+    self_hosted: true
+    jit: true
+    resource_mb: 2048
+    optional: true
+    permissions: [write]
+
+  - id: ragas
+    name: RAGAS
+    category: evaluation
+    capabilities: [VERIFICATION]
+    provides: []
+    repository: https://github.com/explodinggradients/ragas
+    documentation: https://docs.ragas.io/
+    owner: explodinggradients
+    license: Apache-2.0
+    integration: library
+    install_method: python
+    install_target: ragas
+    python_module: ragas
+    platforms: [windows, linux]
+    paid: false
+    self_hosted: true
+    jit: true
+    resource_mb: 800
+    optional: true
+    permissions: [read, write]
+
+  - id: promptfoo
+    name: Promptfoo
+    category: evaluation
+    capabilities: [VERIFICATION]
+    provides: []
+    repository: https://github.com/promptfoo/promptfoo
+    documentation: https://www.promptfoo.dev/docs/
+    owner: promptfoo
+    license: MIT
+    integration: library
+    install_method: node
+    install_target: promptfoo
+    platforms: [windows, linux]
+    runtimes: [node>=18]
+    paid: false
+    self_hosted: true
+    jit: true
+    resource_mb: 400
+    optional: true
+    permissions: [read, write]
+
+  # --------------------------------------------------------------- ROUTING ---
+  - id: scikit-learn
+    name: scikit-learn (Random Forest router)
+    category: routing
+    capabilities: [ROUTING]
+    provides: [ROUTING]
+    repository: https://github.com/scikit-learn/scikit-learn
+    documentation: https://scikit-learn.org/stable/modules/ensemble.html#forest
+    owner: scikit-learn
+    license: "BSD-3-Clause"
+    integration: library
+    install_method: python
+    install_target: scikit-learn
+    python_module: sklearn
+    platforms: [windows, linux]
+    paid: false
+    self_hosted: true
+    jit: false
+    resource_mb: 220
+    permissions: [read, write]
+
+  # ------------------------------------------------- OPTIONAL LOCAL RUNTIME ---
+  - id: llama-cpp-python
+    name: llama.cpp (optional local inference)
+    category: runtime
+    capabilities: []
+    provides: []
+    repository: https://github.com/abetlen/llama-cpp-python
+    documentation: https://github.com/abetlen/llama-cpp-python
+    owner: abetlen
+    license: MIT
+    integration: library
+    install_method: python
+    install_target: llama-cpp-python
+    python_module: llama_cpp
+    platforms: [windows, linux]
+    paid: false
+    self_hosted: true
+    jit: true
+    resource_mb: 4096
+    optional: true
+    enabled: false
+    permissions: [execute, read]
+    notes: >-
+      OPTIONAL AND OFF BY DEFAULT. Installing this never makes local inference
+      mandatory. Model routing stays with OpenCode (Google/Groq).
+
+  - id: ollama
+    name: Ollama (optional local inference)
+    category: runtime
+    capabilities: []
+    provides: []
+    repository: https://github.com/ollama/ollama
+    documentation: https://github.com/ollama/ollama
+    owner: ollama
+    license: MIT
+    integration: service
+    install_method: binary
+    install_target: https://ollama.com/download
+    executable: ollama
+    platforms: [windows, linux]
+    paid: false
+    self_hosted: true
+    jit: true
+    resource_mb: 4096
+    optional: true
+    enabled: false
+    permissions: [execute, read]
+    notes: "OPTIONAL AND OFF BY DEFAULT. Never a mandatory dependency."

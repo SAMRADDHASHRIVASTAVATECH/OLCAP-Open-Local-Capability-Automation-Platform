@@ -1,0 +1,640 @@
+# =============================================================================
+# CAPABILITY REGISTRY DEFINITIONS
+#
+# Three grouped MCP servers. Each capability maps to an ordered list of
+# component ids; the first healthy+available one is used, the rest are
+# automatic fallbacks. The user never selects the backend manually.
+# =============================================================================
+
+servers:
+
+  - id: web_browser
+    name: "MCP Server 1 - Web + Browser"
+    transport: stdio
+    description: "Internet search, browsing, crawling, extraction, browser automation."
+
+  - id: research_knowledge
+    name: "MCP Server 2 - Research + Knowledge"
+    transport: stdio
+    description: "Research, RAG, memory, document intelligence, source verification."
+
+  - id: data_automation_os
+    name: "MCP Server 3 - Data + Automation + Computer/OS"
+    transport: stdio
+    description: "Data analysis, databases, vectors, workflows, durable tasks, OS control."
+
+capabilities:
+
+  # ==================== MCP SERVER 1 - WEB + BROWSER =========================
+  - id: WEB_SEARCH
+    name: Internet search
+    server: web_browser
+    tool: web_search
+    category: search
+    description: >-
+      Multi-source internet search with deduplication, ranking and provenance.
+    inputs:
+      query: {type: string, required: true}
+      engines: {type: array, required: false, default: [duckduckgo, wikipedia]}
+      max_results: {type: integer, required: false, default: 10}
+      recency_days: {type: integer, required: false}
+    outputs:
+      results: {type: array}
+      engine_stats: {type: object}
+    implementations: [olcap-search-core, searxng]
+    fallback: [olcap-search-core]
+    permissions: [network]
+    jit: false
+    verification_required: false
+
+  - id: WEB_BROWSE
+    name: Web browsing / page navigation
+    server: web_browser
+    tool: web_browse
+    category: browse
+    description: "Fetch a URL, follow redirects, return rendered-ish HTML plus metadata."
+    inputs:
+      url: {type: string, required: true}
+      render: {type: boolean, required: false, default: false}
+      max_bytes: {type: integer, required: false, default: 2000000}
+    outputs:
+      status: {type: integer}
+      final_url: {type: string}
+      html: {type: string}
+      title: {type: string}
+      links: {type: array}
+    implementations: [olcap-fetch, playwright]
+    optional_backends: [jina-reader]
+    fallback: [olcap-fetch]
+    permissions: [network]
+    jit: false
+
+  - id: WEB_CRAWL
+    name: Web crawling
+    server: web_browser
+    tool: web_crawl
+    category: crawl
+    description: "Breadth-first crawl within a domain, respecting robots.txt and limits."
+    inputs:
+      url: {type: string, required: true}
+      max_pages: {type: integer, required: false, default: 20}
+      max_depth: {type: integer, required: false, default: 2}
+      same_domain: {type: boolean, required: false, default: true}
+      extract: {type: boolean, required: false, default: true}
+      destination: {type: string, required: false}
+    outputs:
+      pages: {type: array}
+      visited: {type: integer}
+    implementations: [olcap-crawler, crawl4ai]
+    optional_backends: [firecrawl]
+    fallback: [olcap-crawler]
+    permissions: [network]
+    jit: true
+
+  - id: WEB_EXTRACT
+    name: Content extraction
+    server: web_browser
+    tool: web_extract
+    category: extract
+    description: "Extract main content, metadata and structured fields from a page."
+    inputs:
+      url: {type: string, required: true}
+      mode: {type: string, required: false, default: text}
+      schema: {type: object, required: false}
+    outputs:
+      text: {type: string}
+      metadata: {type: object}
+    implementations: [trafilatura, crawl4ai]
+    optional_backends: [jina-reader]
+    fallback: [trafilatura]
+    permissions: [network]
+    jit: false
+
+  - id: WEB_INTERACT
+    name: Browser automation / interaction
+    server: web_browser
+    tool: web_interact
+    category: browser
+    description: >-
+      Drive a real browser: navigate, click, type, select, wait, screenshot.
+    inputs:
+      action: {type: string, required: true}
+      url: {type: string, required: false}
+      selector: {type: string, required: false}
+      text: {type: string, required: false}
+      timeout_ms: {type: integer, required: false, default: 30000}
+    outputs:
+      ok: {type: boolean}
+      content: {type: string}
+      screenshot_path: {type: string}
+    implementations: [playwright]
+    optional_backends: [browser-use, stagehand]
+    fallback: [playwright]
+    permissions: [network, execute]
+    jit: true
+
+  - id: SOURCE_DISCOVERY
+    name: Source discovery
+    server: web_browser
+    tool: web_discover_sources
+    category: search
+    description: "Find candidate sources for a topic and score them by diversity."
+    inputs:
+      topic: {type: string, required: true}
+      max_sources: {type: integer, required: false, default: 12}
+    outputs:
+      sources: {type: array}
+    implementations: [olcap-search-core, searxng]
+    fallback: [olcap-search-core]
+    permissions: [network]
+    jit: false
+
+  - id: SOURCE_COMPARISON
+    name: Source comparison
+    server: web_browser
+    tool: web_compare_sources
+    category: search
+    description: "Compare claims across sources and surface agreement/disagreement."
+    inputs:
+      claim: {type: string, required: true}
+      sources: {type: array, required: false}
+      max_sources: {type: integer, required: false, default: 6}
+    outputs:
+      comparison: {type: array}
+      agreement: {type: number}
+    implementations: [olcap-search-core]
+    optional_backends: [olcap-research-engine]
+    fallback: [olcap-search-core]
+    permissions: [network]
+    jit: false
+
+  # ================ MCP SERVER 2 - RESEARCH + KNOWLEDGE ======================
+  - id: RESEARCH
+    name: Deep research
+    server: research_knowledge
+    tool: research_run
+    category: research
+    description: >-
+      Plan sub-questions, gather evidence from the web, verify sources, and
+      produce a cited report with a confidence score.
+    inputs:
+      question: {type: string, required: true}
+      depth: {type: integer, required: false, default: 2}
+      max_sources: {type: integer, required: false, default: 12}
+      verify: {type: boolean, required: false, default: true}
+    outputs:
+      report: {type: string}
+      findings: {type: array}
+      sources: {type: array}
+      confidence: {type: number}
+    implementations: [olcap-research-engine]
+    optional_backends: [gpt-researcher, open-deep-search, mindsearch, perplexica]
+    fallback: [olcap-research-engine]
+    permissions: [network, read, write]
+    jit: true
+    verification_required: true
+
+  - id: KNOWLEDGE_SEARCH
+    name: Knowledge search
+    server: research_knowledge
+    tool: knowledge_search
+    category: knowledge
+    description: "Semantic + lexical search across ingested knowledge bases."
+    inputs:
+      query: {type: string, required: true}
+      collection: {type: string, required: false, default: default}
+      top_k: {type: integer, required: false, default: 8}
+      mode: {type: string, required: false, default: hybrid}
+    outputs:
+      hits: {type: array}
+    implementations: [olcap-rag]
+    optional_backends: [llamaindex, haystack, anythingllm]
+    fallback: [olcap-rag]
+    permissions: [read]
+    jit: false
+
+  - id: RAG
+    name: Retrieval-augmented generation
+    server: research_knowledge
+    tool: rag_query
+    category: rag
+    description: "Ingest documents into a collection, then answer with citations."
+    inputs:
+      action: {type: string, required: true}
+      collection: {type: string, required: false, default: default}
+      query: {type: string, required: false}
+      paths: {type: array, required: false}
+      urls: {type: array, required: false}
+      text: {type: string, required: false}
+      top_k: {type: integer, required: false, default: 6}
+      source: {type: string, required: false}
+      title: {type: string, required: false}
+      mode: {type: string, required: false, default: hybrid}
+    outputs:
+      answer: {type: string}
+      citations: {type: array}
+      chunks: {type: array}
+    implementations: [olcap-rag, llamaindex, haystack]
+    optional_backends: [ragflow, anythingllm]
+    fallback: [olcap-rag]
+    permissions: [read, write]
+    jit: true
+    verification_required: true
+
+  - id: MEMORY
+    name: Memory
+    server: research_knowledge
+    tool: memory_op
+    category: memory
+    description: >-
+      Episodic, semantic and procedural memory with salience, decay and
+      provenance. Shared by every agent, server and workflow.
+    inputs:
+      action: {type: string, required: true}
+      kind: {type: string, required: false, default: semantic}
+      text: {type: string, required: false}
+      query: {type: string, required: false}
+      limit: {type: integer, required: false, default: 10}
+      id: {type: string, required: false}
+      salience: {type: number, required: false, default: 0.5}
+      meta: {type: object, required: false}
+      source: {type: string, required: false}
+      title: {type: string, required: false}
+    outputs:
+      items: {type: array}
+      ok: {type: boolean}
+    implementations: [olcap-memory, mem0, cognee, graphiti]
+    optional_backends: [letta]
+    fallback: [olcap-memory]
+    permissions: [read, write]
+    jit: false
+
+  - id: DOCUMENT_INTELLIGENCE
+    name: Document intelligence
+    server: research_knowledge
+    tool: document_process
+    category: document
+    description: "Parse PDF/DOCX/HTML/TXT/MD into text, sections and tables."
+    inputs:
+      action: {type: string, required: true}
+      path: {type: string, required: false}
+      url: {type: string, required: false}
+      engine: {type: string, required: false}
+    outputs:
+      text: {type: string}
+      sections: {type: array}
+      tables: {type: array}
+      metadata: {type: object}
+    implementations: [pypdf, python-docx, olcap-text-extract, trafilatura,
+                      docling, unstructured, marker]
+    fallback: [olcap-text-extract, pypdf, trafilatura]
+    permissions: [read]
+    jit: true
+
+  - id: SOURCE_VERIFICATION
+    name: Source verification
+    server: research_knowledge
+    tool: source_verify
+    category: verification
+    description: >-
+      Check claims/sources: cross-source agreement, domain reputation, recency,
+      citation presence, contradiction detection.
+    inputs:
+      claim: {type: string, required: true}
+      sources: {type: array, required: false}
+      min_sources: {type: integer, required: false, default: 2}
+      evidence: {type: array, required: false}
+    outputs:
+      verdict: {type: string}
+      confidence: {type: number}
+      evidence: {type: array}
+    implementations: [olcap-research-engine]
+    optional_backends: [ragas]
+    fallback: [olcap-research-engine]
+    permissions: [network]
+    jit: false
+    verification_required: true
+
+  # ============ MCP SERVER 3 - DATA + AUTOMATION + COMPUTER/OS ===============
+  - id: DATA_ANALYSIS
+    name: Data analysis
+    server: data_automation_os
+    tool: data_analyze
+    category: data
+    description: "Profile, clean, aggregate and summarise CSV/Parquet/JSON/SQLite data."
+    inputs:
+      action: {type: string, required: true}
+      path: {type: string, required: false}
+      destination: {type: string, required: false}
+      expr: {type: string, required: false}
+      query: {type: string, required: false}
+      limit: {type: integer, required: false, default: 20}
+    outputs:
+      columns: {type: array}
+      rows: {type: array}
+      summary: {type: object}
+    implementations: [duckdb]
+    fallback: [duckdb]
+    permissions: [read, write]
+    jit: false
+
+  - id: DATABASE_QUERY
+    name: Database query
+    server: data_automation_os
+    tool: database_query
+    category: database
+    description: "SQL over DuckDB/SQLite/Parquet with guardrails and result limits."
+    inputs:
+      sql: {type: string, required: true}
+      source: {type: string, required: false}
+      limit: {type: integer, required: false, default: 1000}
+    outputs:
+      columns: {type: array}
+      rows: {type: array}
+      rowcount: {type: integer}
+    implementations: [duckdb]
+    optional_backends: [pgvector]
+    fallback: [duckdb]
+    permissions: [read, write]
+    jit: false
+
+  - id: VECTOR_STORAGE
+    name: Vector storage
+    server: data_automation_os
+    tool: vector_store_op
+    category: vector
+    description: "Create/upsert/search vector collections (embedded, no server needed)."
+    inputs:
+      action: {type: string, required: true}
+      collection: {type: string, required: false, default: default}
+      vectors: {type: array, required: false}
+      query: {type: string, required: false}
+      top_k: {type: integer, required: false, default: 10}
+      dim: {type: integer, required: false, default: 256}
+      vector: {type: array, required: false}
+    outputs:
+      hits: {type: array}
+      count: {type: integer}
+    implementations: [sqlite-vec, qdrant, chroma]
+    optional_backends: [pgvector]
+    fallback: [sqlite-vec]
+    permissions: [read, write]
+    jit: true
+
+  - id: WORKFLOW_EXECUTION
+    name: Workflow execution
+    server: data_automation_os
+    tool: workflow_run
+    category: automation
+    description: "Define, execute, pause, resume and inspect multi-step workflows."
+    inputs:
+      action: {type: string, required: true}
+      workflow: {type: object, required: false}
+      run_id: {type: string, required: false}
+    outputs:
+      run_id: {type: string}
+      state: {type: string}
+      steps: {type: array}
+    implementations: [olcap-workflows]
+    optional_backends: [prefect, temporal, langgraph, crewai]
+    fallback: [olcap-workflows]
+    permissions: [read, write, execute]
+    jit: false
+
+  - id: DURABLE_TASKS
+    name: Durable tasks
+    server: data_automation_os
+    tool: task_schedule
+    category: automation
+    description: "Crash-safe queued tasks with retries, backoff, checkpoints and resume."
+    inputs:
+      action: {type: string, required: true}
+      task: {type: object, required: false}
+      task_id: {type: string, required: false}
+      max_retries: {type: integer, required: false, default: 3}
+    outputs:
+      task_id: {type: string}
+      status: {type: string}
+      attempts: {type: integer}
+    implementations: [olcap-workflows]
+    optional_backends: [prefect, temporal]
+    fallback: [olcap-workflows]
+    permissions: [read, write, execute]
+    jit: false
+
+  - id: FILESYSTEM
+    name: Filesystem
+    server: data_automation_os
+    tool: filesystem_op
+    category: os
+    description: "Read/write/list/stat/move/copy/delete through the permission policy."
+    inputs:
+      action: {type: string, required: true}
+      path: {type: string, required: false}
+      destination: {type: string, required: false}
+      content: {type: string, required: false}
+      pattern: {type: string, required: false}
+      recursive: {type: boolean, required: false, default: false}
+      limit: {type: integer, required: false, default: 500}
+      append: {type: boolean, required: false, default: false}
+    outputs:
+      ok: {type: boolean}
+      entries: {type: array}
+      content: {type: string}
+    implementations: [olcap-os-adapter]
+    fallback: [olcap-os-adapter]
+    permissions: [read, write, destructive]
+    jit: false
+
+  - id: TERMINAL
+    name: Terminal
+    server: data_automation_os
+    tool: terminal_run
+    category: os
+    description: "Run a shell command with timeout, cwd, env filtering and audit."
+    inputs:
+      command: {type: string, required: true}
+      cwd: {type: string, required: false}
+      timeout_s: {type: integer, required: false, default: 120}
+      shell: {type: string, required: false}
+    outputs:
+      exit_code: {type: integer}
+      stdout: {type: string}
+      stderr: {type: string}
+    implementations: [olcap-os-adapter]
+    fallback: [olcap-os-adapter]
+    permissions: [execute]
+    jit: false
+
+  - id: PROCESS_CONTROL
+    name: Process control
+    server: data_automation_os
+    tool: process_control
+    category: os
+    description: "List, inspect, start and stop processes."
+    inputs:
+      action: {type: string, required: true}
+      pid: {type: integer, required: false}
+      name: {type: string, required: false}
+      argv: {type: array, required: false}
+      cwd: {type: string, required: false}
+      env: {type: object, required: false}
+      force: {type: boolean, required: false, default: true}
+    outputs:
+      processes: {type: array}
+      ok: {type: boolean}
+    implementations: [olcap-os-adapter]
+    optional_backends: [pywin32]
+    fallback: [olcap-os-adapter]
+    permissions: [execute, destructive]
+    jit: false
+
+  - id: COMPUTER_USE
+    name: Computer use
+    server: data_automation_os
+    tool: computer_use
+    category: os
+    description: "Composite screen+input control: observe the desktop and act on it."
+    inputs:
+      action: {type: string, required: true}
+      params: {type: object, required: false}
+    outputs:
+      ok: {type: boolean}
+      observation: {type: object}
+    implementations: [olcap-os-adapter]
+    optional_backends: [pyautogui, openhands]
+    fallback: [olcap-os-adapter]
+    permissions: [execute, read]
+    jit: true
+
+  - id: WINDOWS_CONTROL
+    name: Windows OS control
+    server: data_automation_os
+    tool: windows_control
+    category: os
+    description: >-
+      Windows-native control: services, registry read, environment, apps,
+      clipboard, notifications. Linux equivalent provided by the OS adapter.
+    inputs:
+      action: {type: string, required: true}
+      params: {type: object, required: false}
+    outputs:
+      ok: {type: boolean}
+      data: {type: object}
+    implementations: [olcap-os-adapter]
+    optional_backends: [pywin32]
+    fallback: [olcap-os-adapter]
+    platforms: [windows, linux]
+    permissions: [read, write, execute, destructive]
+    jit: false
+
+  - id: GUI
+    name: GUI automation
+    server: data_automation_os
+    tool: gui_action
+    category: os
+    description: "Keyboard/mouse automation and element interaction."
+    inputs:
+      action: {type: string, required: true}
+      params: {type: object, required: false}
+    outputs:
+      ok: {type: boolean}
+    implementations: [olcap-os-adapter, playwright]
+    optional_backends: [pyautogui]
+    fallback: [olcap-os-adapter]
+    permissions: [execute]
+    jit: true
+
+  - id: SCREENSHOT
+    name: Screenshot
+    server: data_automation_os
+    tool: screenshot_capture
+    category: os
+    description: "Capture the screen, a window or a region to a file."
+    inputs:
+      target: {type: string, required: false, default: screen}
+      region: {type: array, required: false}
+      path: {type: string, required: false}
+    outputs:
+      path: {type: string}
+      ok: {type: boolean}
+    implementations: [pillow, olcap-os-adapter, playwright]
+    optional_backends: [pyautogui]
+    fallback: [olcap-os-adapter]
+    permissions: [read, write]
+    jit: false
+
+  - id: WINDOW_MANAGEMENT
+    name: Window management
+    server: data_automation_os
+    tool: window_manage
+    category: os
+    description: "List, focus, move, resize, minimise and close windows."
+    inputs:
+      action: {type: string, required: true}
+      title: {type: string, required: false}
+      params: {type: object, required: false}
+    outputs:
+      windows: {type: array}
+      ok: {type: boolean}
+    implementations: [olcap-os-adapter]
+    optional_backends: [pywin32]
+    fallback: [olcap-os-adapter]
+    platforms: [windows, linux]
+    permissions: [execute]
+    jit: false
+
+  - id: OBSERVABILITY
+    name: Observability
+    server: data_automation_os
+    tool: observability_report
+    category: observability
+    description: "Spans, counters, traces and health of the whole system."
+    inputs:
+      scope: {type: string, required: false, default: summary}
+    outputs:
+      counters: {type: object}
+      health: {type: object}
+    implementations: [olcap-observability]
+    optional_backends: [opentelemetry, phoenix, langfuse]
+    fallback: [olcap-observability]
+    permissions: [read]
+    jit: false
+
+  - id: VERIFICATION
+    name: Verification
+    server: data_automation_os
+    tool: verify_result
+    category: verification
+    description: "Check that a produced artifact satisfies its success criteria."
+    inputs:
+      artifact_id: {type: string, required: false}
+      criteria: {type: array, required: false}
+      result: {type: object, required: false}
+    outputs:
+      passed: {type: boolean}
+      checks: {type: array}
+    implementations: [olcap-verification, ragas]
+    optional_backends: [promptfoo]
+    fallback: [olcap-verification]
+    permissions: [read]
+    jit: false
+    verification_required: true
+
+  - id: ROUTING
+    name: Adaptive routing
+    server: data_automation_os
+    tool: routing_model_op
+    category: routing
+    description: "Random Forest routing: train, validate, compare, enable/disable."
+    inputs:
+      action: {type: string, required: true}
+      capability: {type: string, required: false}
+    outputs:
+      status: {type: string}
+      metrics: {type: object}
+    implementations: [olcap-deterministic-router]
+    optional_backends: [scikit-learn]
+    fallback: [olcap-deterministic-router]
+    permissions: [read, write]
+    jit: false
